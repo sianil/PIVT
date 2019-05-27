@@ -1,0 +1,285 @@
+{{ $orderer := (printf "hlf-orderer--%s" (index .Values.OrdererOrgs 0).Name | lower) }} 
+{{ $vars:= dict}}
+
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hlf-channels-
+spec:
+  entrypoint: channels
+
+  volumes:
+  - name: hlf-channels
+    secret:
+      secretName: hlf-channels
+  - name: hlf-channel-anchors
+    secret:
+      secretName: hlf-channel-anchors
+
+{{ range $i, $org := .Values.PeerOrgs }}
+{{- $peerStartIndex := (not $org.Template.Start) | ternary 0 $org.Template.Start | int }}
+{{- range $peerIndex := untilStep $peerStartIndex (add $peerStartIndex $org.Template.Count | int) 1 }}
+{{- $peer := (printf "peer%s" ($peerIndex | toString)) }}
+
+  - name: peer-{{ $org.Name | lower }}-{{ $peer | lower }}-tls
+    secret:
+      secretName: hlf-peer--{{ $org.Name | lower }}--{{ $peer | lower }}-tls
+  - name: peer-{{ $org.Name | lower }}-{{ $peer | lower }}-admin-msp
+    secret:
+      secretName: hlf-peer--{{ $org.Name | lower }}--{{ $peer | lower }}-admin-msp
+      items:
+      - key: cert.pem
+        path: signcerts/cert.pem
+      - key: key.pem
+        path: keystore/key.pem
+      - key: cacert.pem
+        path: cacerts/cert.pem
+      - key: tlscacert.pem
+        path: tlscacerts/cert.pem
+      - key: admincert.pem
+        path: admincerts/cert.pem
+{{ end }} {{- /* Peers */ -}}
+{{ end }} {{- /* Orgs */ -}} {{ "" }}
+
+  templates:
+  - name: channels
+    steps:
+# top level: channels
+{{- $_ := set $vars "firstStep" true }}
+{{- range $i, $channel := .Values.network.channels }}
+{{- if or $vars.firstStep (not $.Values.flow.channel.parallel) }}
+    - 
+{{- end }}
+      - name: channel--{{ $channel.name }}
+        template: channel--{{ $channel.name }}
+{{- $_ := set $vars "firstStep" false }}
+{{ end }} {{- /* channels */ -}}
+
+# second level: channel templates
+{{- range $i, $channel := .Values.network.channels }}
+  - name: channel--{{ $channel.name }}
+    steps:
+    - - name: create-channel--{{ $channel.name }}
+        template: create-channel--{{ $channel.name }}
+    - - name: join-channel--{{ $channel.name }}
+        template: join-channel--{{ $channel.name }}
+    - - name: update-channel--{{ $channel.name }}
+        template: update-channel--{{ $channel.name }}
+{{ end }} {{- /* channels */ -}}
+
+# third level: channel create templates
+{{ range $i, $channel := .Values.network.channels }}
+  - name: create-channel--{{ $channel.name }}
+    steps:
+    - 
+{{- $orgName := index $channel.orgs 0 }}
+{{- range $i, $org := $.Values.PeerOrgs }}
+
+{{- if eq $orgName $org.Name }}
+
+{{- $peerStartIndex := (not $org.Template.Start) | ternary 0 $org.Template.Start | int }}
+{{- $peer := (printf "peer%s" ($peerStartIndex | toString)) }}
+
+      - name: create-channel--{{ $channel.name }}--{{ $org.Name | lower }}--{{ $peer | lower }}
+        template: create-channel--{{ $channel.name }}--{{ $org.Name | lower }}--{{ $peer | lower }}
+
+{{- end }} {{- /* if org */ -}} 
+{{- end }} {{- /* channel.orgs */ -}}
+{{- end }} {{- /* channels */ -}} {{""}}
+
+# third level: channel join templates
+{{ range $i, $channel := .Values.network.channels }}
+{{- $_ := set $vars "firstStep" true }}
+  - name: join-channel--{{ $channel.name }}
+    steps:
+{{- range $orgName := $channel.orgs }}
+{{- range $i, $org := $.Values.PeerOrgs }}
+
+{{- if eq $orgName $org.Name }}
+
+{{- $peerStartIndex := (not $org.Template.Start) | ternary 0 $org.Template.Start | int }}
+{{- range $peerIndex := untilStep $peerStartIndex (add $peerStartIndex $org.Template.Count | int) 1 }}
+{{- $peer := (printf "peer%s" ($peerIndex | toString)) }}
+{{- if or $vars.firstStep (not $.Values.flow.join.parallel) }}
+    - 
+{{- end }}
+      - name: join-channel--{{ $channel.name }}--{{ $org.Name | lower }}--{{ $peer | lower }}
+        template: join-channel--{{ $channel.name }}--{{ $org.Name | lower }}--{{ $peer | lower }}
+
+{{- $_ := set $vars "firstStep" false }}
+
+{{ end }} {{- /* peerIndex */ -}} 
+{{ end }} {{- /* if org */ -}} 
+{{ end }} {{- /* peer.Orgs */ -}}
+{{ end }} {{- /* channel.orgs */ -}}
+{{ end }} {{- /* channels */ -}}{{""}}
+
+# third level: channel update templates
+{{ range $i, $channel := .Values.network.channels }}
+{{- $_ := set $vars "firstStep" true }}
+  - name: update-channel--{{ $channel.name }}
+    steps:
+{{- range $orgName := $channel.orgs }}
+{{- range $i, $org := $.Values.PeerOrgs }}
+
+{{- if eq $orgName $org.Name }}
+
+{{- $peerStartIndex := (not $org.Template.Start) | ternary 0 $org.Template.Start | int }}
+{{- $peer := (printf "peer%s" ($peerStartIndex | toString)) }}
+{{- if or $vars.firstStep (not $.Values.flow.update.parallel) }}
+    - 
+{{- end }}
+      - name: update-channel--{{ $channel.name }}--{{ $org.Name | lower }}--{{ $peer | lower }}
+        template: update-channel--{{ $channel.name }}--{{ $org.Name | lower }}--{{ $peer | lower }}
+
+{{- $_ := set $vars "firstStep" false }}
+
+{{- end }} {{- /* if org */ -}} 
+{{ end }} {{- /* peer.Orgs */ -}}
+{{- end }} {{- /* channel.orgs */ -}}
+{{- end }} {{- /* channels */ -}} {{""}}
+
+# leaf create templates
+{{- range $i, $channel := .Values.network.channels }}
+{{- $orgName := index $channel.orgs 0 }}
+{{- range $i, $org := $.Values.PeerOrgs }}
+
+{{- if eq $orgName $org.Name }}
+
+{{- $peerStartIndex := (not $org.Template.Start) | ternary 0 $org.Template.Start | int }}
+{{- $peer := (printf "peer%s" ($peerStartIndex | toString)) }}
+
+  - name: create-channel--{{ $channel.name }}--{{ $org.Name | lower }}--{{ $peer | lower }}
+    # channel: {{ $channel.name }}
+    # org: {{ $org.Name }}
+    # peer: {{ $peer }}
+    inputs:
+    retryStrategy:
+      limit: {{ $.Values.retryCount }}
+    container:
+      image: hyperledger/fabric-peer:{{ $.Values.hyperledgerVersion }}
+      command: ["sh", "-c", "peer channel create -o {{ $orderer }}:7050 -c {{ $channel.name }} -f /hlf_config/channel/{{ $channel.name }}.tx"]
+
+      volumeMounts:
+        - mountPath: /etc/hyperledger/fabric/tls/
+          name: peer-{{ $org.Name | lower }}-{{ $peer | lower }}-tls
+        - mountPath: /etc/hyperledger/fabric/msp/
+          name: peer-{{ $org.Name | lower }}-{{ $peer | lower }}-admin-msp
+        - mountPath: /hlf_config/channel/
+          name: hlf-channels
+      
+      env:
+        - name: CORE_PEER_ADDRESS
+          value: hlf-peer--{{ $org.Name | lower }}--{{ $peer | lower }}:7051
+        - name: FABRIC_LOGGING_SPEC
+          value: debug
+        - name: CORE_PEER_LOCALMSPID
+          value: {{ $org.Name }}MSP
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: /etc/hyperledger/fabric/tls/server.crt
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: /etc/hyperledger/fabric/tls/server.key
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: /etc/hyperledger/fabric/tls/ca.crt
+
+{{- end }} {{- /* if org */ -}} 
+{{- end }} {{- /* channel.orgs */ -}}
+{{- end }} {{- /* channels */ -}}
+
+# leaf join templates
+{{- range $i, $channel := .Values.network.channels }}
+{{- range $orgName := $channel.orgs }}
+{{- range $i, $org := $.Values.PeerOrgs }}
+
+{{- if eq $orgName $org.Name }}
+
+{{- $peerStartIndex := (not $org.Template.Start) | ternary 0 $org.Template.Start | int }}
+{{- range $peerIndex := untilStep $peerStartIndex (add $peerStartIndex $org.Template.Count | int) 1 }}
+{{- $peer := (printf "peer%s" ($peerIndex | toString)) }}
+
+  - name: join-channel--{{ $channel.name }}--{{ $org.Name | lower }}--{{ $peer | lower }}
+    # channel: {{ $channel.name }}
+    # org: {{ $org.Name }}
+    # peer: {{ $peer }}
+    inputs:
+    retryStrategy:
+      limit: {{ $.Values.retryCount }}
+    container:
+      image: hyperledger/fabric-peer:{{ $.Values.hyperledgerVersion }}
+      command: ["sh", "-c", "peer channel fetch config /var/hyperledger/{{ $channel.name }}.block -c {{ $channel.name }} -o {{ $orderer }}:7050 && \
+                             peer channel join -b /var/hyperledger/{{ $channel.name }}.block"]
+
+      volumeMounts:
+        - mountPath: /etc/hyperledger/fabric/tls/
+          name: peer-{{ $org.Name | lower }}-{{ $peer | lower }}-tls
+        - mountPath: /etc/hyperledger/fabric/msp/
+          name: peer-{{ $org.Name | lower }}-{{ $peer | lower }}-admin-msp
+      
+      env:
+        - name: CORE_PEER_ADDRESS
+          value: hlf-peer--{{ $org.Name | lower }}--{{ $peer | lower }}:7051
+        - name: FABRIC_LOGGING_SPEC
+          value: debug
+        - name: CORE_PEER_LOCALMSPID
+          value: {{ $org.Name }}MSP
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: /etc/hyperledger/fabric/tls/server.crt
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: /etc/hyperledger/fabric/tls/server.key
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: /etc/hyperledger/fabric/tls/ca.crt
+
+{{- end }} {{- /* peerIndex */ -}} 
+{{- end }} {{- /* if org */ -}} 
+{{- end }} {{- /* peer.Orgs */ -}}
+{{- end }} {{- /* channel.orgs */ -}}
+{{- end }} {{- /* channels */ -}}
+
+# leaf update templates
+{{- range $i, $channel := .Values.network.channels }}
+{{- range $orgName := $channel.orgs }}
+{{- range $i, $org := $.Values.PeerOrgs }}
+
+{{- if eq $orgName $org.Name }}
+
+{{- $peerStartIndex := (not $org.Template.Start) | ternary 0 $org.Template.Start | int }}
+{{- $peer := (printf "peer%s" ($peerStartIndex | toString)) }}
+
+  - name: update-channel--{{ $channel.name }}--{{ $org.Name | lower }}--{{ $peer | lower }}
+    # channel: {{ $channel.name }}
+    # org: {{ $org.Name }}
+    # peer: {{ $peer }}
+    inputs:
+    retryStrategy:
+      limit: {{ $.Values.retryCount }}
+    container:
+      image: hyperledger/fabric-peer:{{ $.Values.hyperledgerVersion }}
+      command: ["sh", "-c", "peer channel update -o {{ $orderer }}:7050 -c {{ $channel.name }} -f /hlf_config/channel/{{ $channel.name }}-{{ $orgName }}.tx"]
+
+      volumeMounts:
+        - mountPath: /etc/hyperledger/fabric/tls/
+          name: peer-{{ $org.Name | lower }}-{{ $peer | lower }}-tls
+        - mountPath: /etc/hyperledger/fabric/msp/
+          name: peer-{{ $org.Name | lower }}-{{ $peer | lower }}-admin-msp
+        - mountPath: /hlf_config/channel/
+          name: hlf-channel-anchors
+      
+      env:
+        - name: CORE_PEER_ADDRESS
+          value: hlf-peer--{{ $org.Name | lower }}--{{ $peer | lower }}:7051
+        - name: FABRIC_LOGGING_SPEC
+          value: debug
+        - name: CORE_PEER_LOCALMSPID
+          value: {{ $org.Name }}MSP
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: /etc/hyperledger/fabric/tls/server.crt
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: /etc/hyperledger/fabric/tls/server.key
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: /etc/hyperledger/fabric/tls/ca.crt
+
+{{- end }} {{- /* if org */ -}} 
+{{- end }} {{- /* peer.Orgs */ -}}
+{{- end }} {{- /* channel.orgs */ -}}
+{{- end }} {{- /* channels */ -}}
+---

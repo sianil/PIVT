@@ -1,0 +1,21 @@
+{{- if or .Values.backup.enabled .Values.restore.enabled }}
+{{- range $i, $org := .Values.OrdererOrgs }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hlf-orderer-rsync--{{ $org.Name | lower }}
+  labels:
+    name: hlf-orderer-rsync--{{ $org.Name | lower }}
+spec:
+  type: ClusterIP
+  clusterIP: None # Headless service for StatefulSet, required to access each pod invividually
+  selector:
+    app: hlf-orderer--{{ $org.Name | lower }}
+  ports:
+  - protocol: TCP
+    port: 873
+    name: rsync
+---
+{{- end }} {{- /* Orgs */ -}}
+{{- end }} {{- /* if backup/restore enabled */ -}}

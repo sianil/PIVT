@@ -1,0 +1,12 @@
+{{- range $i, $chaincode := .Values.network.chaincodes }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hlf-chaincode--{{ $chaincode.name | lower }}
+  labels:
+    chaincodeName: {{ $chaincode.name }}
+binaryData:
+  {{ $chaincode.name }}.tar: |-
+    {{ ($.Files.Get (printf "chaincode/%s.tar" $chaincode.name)) | b64enc }}
+---
+{{- end }} {{- /* chaincode */ -}}

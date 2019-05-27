@@ -1,0 +1,26 @@
+{{- range $i, $org := .Values.PeerOrgs }}
+{{- $peerStartIndex := (not $org.Template.Start) | ternary 0 $org.Template.Start | int }}
+{{- range $peerIndex := untilStep $peerStartIndex (add $peerStartIndex $org.Template.Count | int) 1 }}
+{{- $peer := (printf "peer%s" ($peerIndex | toString)) }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hlf-peer--{{ $org.Name | lower }}--{{ $peer | lower }}
+  labels:
+    name: hlf-peer--{{ $org.Name | lower }}--{{ $peer | lower }}
+spec:
+  type: ClusterIP
+  selector:
+    name: hlf-peer
+    app: hlf-peer--{{ $org.Name | lower }}--{{ $peer | lower }}
+  ports:
+  - protocol: TCP
+    port: 7051
+    name: grpc
+  - protocol: TCP
+    port: 7052
+    name: chaincode
+---
+{{- end }} {{- /* Peers */ -}}
+{{- end }} {{- /* Orgs */ -}}
