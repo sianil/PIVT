@@ -3,5 +3,5 @@ It's also used for transitioning between normal operation and backup/restore mod
 
 This chart can also optionally deploy a Kafka cluster as part of this chart.
 
-Please refer to [README](README.md) in the top level directory and also 
-inline comments in the [values.yaml](fabric-kube/hlf-kube/values.yaml) file for how to use this chart.
+Please refer to [README](../../README.md) in the top level directory and also 
+inline comments in the [values.yaml](values.yaml) file for how to use this chart.
