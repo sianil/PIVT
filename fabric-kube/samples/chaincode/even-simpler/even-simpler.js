@@ -1,6 +1,6 @@
 const shim = require('fabric-shim');
-
 const logger = shim.newLogger('chaincode');
+
 const Chaincode = class {
   async Init() {
     return shim.success();
@@ -26,7 +26,6 @@ const Chaincode = class {
   
   async ping() {
     const answer = { ping: 'pong' };
-    //return chainUtil.bufferize(answer);
     return Buffer.from(JSON.stringify(answer), 'utf8');
   }
 };
