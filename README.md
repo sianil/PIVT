@@ -121,6 +121,15 @@ Lets assume you had updated chaincodes and want to upgrade them in the Fabric ne
 ```
 ./prepare_chaincodes.sh ./samples/simple/ ./samples/chaincode/
 ```
+Then make sure chaincode ConfigMaps are updated with new chaincode tar archives:
+```
+helm upgrade hlf-kube -f samples/simple/network.yaml -f samples/simple/crypto-config.yaml  ./hlf-kube
+```
+Or alternatively you can update chaincode ConfigMaps directly:
+```
+helm template -f samples/simple/network.yaml -x templates/chaincode-configmap.yaml ./hlf-kube/ | kubectl apply -f -
+```
+
 Next invoke chaincode flow again with a bit different settings:
 ```
 helm template -f samples/simple/network.yaml -f samples/simple/crypto-config.yaml -f chaincode-flow/values.upgrade.yaml --set chaincode.version=2.0 chaincode-flow/ | argo submit  -  --watch
