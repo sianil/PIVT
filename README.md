@@ -253,7 +253,7 @@ For chart specific configuration, please refer to the comments in the relevant [
 
 ## [Backup-Restore](#backup-restore)
 
-### [Requirements](#backup-restore-requirements)
+### [Backup Restore Requirements](#backup-restore-requirements)
 * Persistence should be enabled in relevant components (Orderer, Peer, CouchDB)
 * Configure Argo for some artifact repository. Easiest way is to install [Minio](https://github.com/argoproj/argo/blob/master/ARTIFACT_REPO.md) 
 * An Azure Blob Storage account with a container named `hlf-backup` (configurable). 
@@ -261,10 +261,10 @@ ATM, backups can only be stored at Azure Blob Storage but it's quite easy to ext
 flows for other mediums, like AWS S3. See bottom of [backup-workflow.yaml](fabric-kube/backup-flow/templates/backup-workflow.yaml)
 
 **IMPORTANT:** Backup flow does not backup contents of Kafka cluster, if you are using Kafka orderer you need to 
-manually back it up. Kafka Orderer with some state cannot handle a fresh Kafka installation, see this 
+manually back it up. In particular, Kafka Orderer with some state cannot handle a fresh Kafka installation, see this 
 [Jira ticket](https://jira.hyperledger.org/browse/FAB-15541), hopefully Fabric guys will fix this soon.
 
-### [Flow](#backup-restore-flow)
+### [Backup Restore Flow](#backup-restore-flow)
 ![HL_backup_restore](https://s3-eu-west-1.amazonaws.com/raft-fabric-kube/images/HL_backup_restore.png)
 
 First lets create a persistent network:
@@ -272,7 +272,7 @@ First lets create a persistent network:
 ./init.sh ./samples/simple-persistent/ ./samples/chaincode/
 helm install --name hlf-kube -f samples/simple-persistent/network.yaml -f samples/simple-persistent/crypto-config.yaml -f samples/simple-persistent/values.yaml ./hlf-kube
 ```
-Again lets wait for all pods are up and running, this make take a bit longer due to provisioning of disks.
+Again lets wait for all pods are up and running, this may take a bit longer due to provisioning of disks.
 ```
 kubectl  get pod --watch
 ```
