@@ -215,6 +215,7 @@ spec:
         {{- $peer := (printf "peer%s" ($peerIndexInner | toString)) }}
               hlf-peer--{{ $org.Name | lower }}--{{ $peer | lower }}:7051
         {{- end }} {{- /* Peers */ -}}{{""}}
+
         - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
           value: hlf-peer--{{ $org.Name | lower }}--{{ $peer | lower }}:7051
         - name: CORE_PEER_LOCALMSPID
@@ -241,8 +242,10 @@ spec:
         - name: CORE_PEER_TLS_ROOTCERT_FILE
           value: /etc/hyperledger/fabric/tls/ca.crt
         
+        - name: CORE_CHAINCODE_LOGGING_LEVEL
+          value: {{ $.Values.peer.chaincode.logging.level }}
         - name: CORE_CHAINCODE_LOGGING_SHIM
-          value: {{ $.Values.peer.shimLogLevel }}
+          value: {{ $.Values.peer.chaincode.logging.shim }}
         
         - name: CORE_LEDGER_STATE_STATEDATABASE
           value: CouchDB

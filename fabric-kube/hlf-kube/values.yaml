@@ -30,7 +30,10 @@ ingress:
 # peer settings. applies to all peers
 peer:
   logLevel: info
-  shimLogLevel: info
+  chaincode:
+    logging:
+      level:  info
+      shim:   info
   persistence:
     enabled: false
     size: 16Gi
