@@ -3,6 +3,7 @@ const logger = shim.newLogger('chaincode');
 
 const Chaincode = class {
   async Init() {
+    logger.info("very-simple init", "");
     return shim.success();
   }
 
@@ -25,6 +26,7 @@ const Chaincode = class {
   }
   
   async ping() {
+    logger.info("ping called", "");
     const answer = { ping: 'pong' };
     return Buffer.from(JSON.stringify(answer), 'utf8');
   }

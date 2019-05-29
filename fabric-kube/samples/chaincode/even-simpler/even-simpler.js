@@ -3,6 +3,7 @@ const logger = shim.newLogger('chaincode');
 
 const Chaincode = class {
   async Init() {
+    logger.info("even-simpler init", "");
     return shim.success();
   }
 
@@ -12,7 +13,7 @@ const Chaincode = class {
 
     const method = this[ret.fcn];
     if (!method) {
-      logger.info(`no function of name:${ret.fcn} found`);
+      logger.info('no function of name:${ret.fcn} found');
       return shim.error(`Received unknown function ${ret.fcn} invocation`);
     }
     try {
@@ -25,6 +26,7 @@ const Chaincode = class {
   }
   
   async ping() {
+    logger.info("ping called", "");
     const answer = { ping: 'pong' };
     return Buffer.from(JSON.stringify(answer), 'utf8');
   }

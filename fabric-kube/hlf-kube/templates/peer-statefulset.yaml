@@ -241,6 +241,9 @@ spec:
         - name: CORE_PEER_TLS_ROOTCERT_FILE
           value: /etc/hyperledger/fabric/tls/ca.crt
         
+        - name: CORE_CHAINCODE_LOGGING_SHIM
+          value: {{ $.Values.peer.shimLogLevel }}
+        
         - name: CORE_LEDGER_STATE_STATEDATABASE
           value: CouchDB
         - name: CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS
