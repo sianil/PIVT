@@ -291,8 +291,8 @@ helm template -f samples/simple-persistent/crypto-config.yaml --set backup.targe
 ```
 ![Screenshot_backup_flow](https://s3-eu-west-1.amazonaws.com/raft-fabric-kube/images/Screenshot_backup_flow.png)
 
-This will create a folder with default `backup.key`, which is html formatted date `yyyy-mm-dd`, 
-and hierarchically store backed up contents there.
+This will create a folder with default `backup.key` (html formatted date `yyyy-mm-dd`), 
+in Azure Blob Storage and hierarchically store backed up contents there.
 
 Finally go back to normal operation:
 ```
