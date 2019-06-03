@@ -3,6 +3,7 @@
 
 * [What is this?](#what-is-this)
 * [Who made this?](#who-made-this)
+* [License](#License)
 * [Requirements](#requirements)
 * [Network Architecture](#network-architecture)
 * [Go over the samples](#go-over-samples)
@@ -17,7 +18,7 @@
   * [Backup](#backup)
   * [Restore](#restore)
 * [Limitations](#limitations)
-
+* [FAQ](#faq)
 * [Conclusion](#conclusion)
 
 ## [What is this?](#what-is-this)
@@ -41,6 +42,9 @@ Special thanks to APG allowing opening the source code :)
 We strongly encourage the HL Fabric community to take ownership of this repository, extend it for
 further use cases, use it as a test bed and adapt it to the Fabric provided samples to get rif of endless 
 Docker Compose files and Bash scripts. 
+
+## [License](#License)
+This work is licensed under same license with HL Fabric; [Apache License 2.0](LICENSE).
 
 ## [Requirements](#requirements)
 * A running Kubernetes cluster, Minikube should also work, but not tested
@@ -338,6 +342,10 @@ If required can be solved by either:
 
 This is possible but they should be run in different namespaces. We do not use Helm release name in names of components, 
 so if multiple instances of Fabric network is running in the same namespace, names will conflict.
+
+## [FAQ](#faq)
+
+See [FAQ](FAQ.md) page for further details.
 
 ## [Conclusion](#conclusion)
 
