@@ -44,7 +44,7 @@ further use cases, use it as a test bed and adapt it to the Fabric provided samp
 Docker Compose files and Bash scripts. 
 
 ## [License](#License)
-This work is licensed under same license with HL Fabric; [Apache License 2.0](LICENSE).
+This work is licensed under the same license with HL Fabric; [Apache License 2.0](LICENSE).
 
 ## [Requirements](#requirements)
 * A running Kubernetes cluster, Minikube should also work, but not tested
