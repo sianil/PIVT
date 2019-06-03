@@ -36,11 +36,11 @@ This work is a result of collaborative effort between [APG](https://www.apg.nl/e
 [Accenture NL](https://www.accenture.com/nl-en). 
 
 We had implemented these Helm charts for our project's needs, and as the results looks very promising, 
-decided to share the source code with HL Fabric community. Hopefully it will fill a large gap!
+decided to share the source code with the HL Fabric community. Hopefully it will fill a large gap!
 Special thanks to APG for allowing opening the source code :)
 
 We strongly encourage the HL Fabric community to take ownership of this repository, extend it for
-further use cases, use it as a test bed and adapt it to the Fabric provided samples to get rif of endless 
+further use cases, use it as a test bed and adapt it to the Fabric provided samples to get rid of endless 
 Docker Compose files and Bash scripts. 
 
 ## [License](#License)
