@@ -32,7 +32,7 @@ This repository contains a couple of Helm charts to:
 * Backup and restore the state of whole network
 
 ## [Who made this?](#who-made-this)
-This work is a result of collaborative effort beetween [APG](https://www.apg.nl/en) and 
+This work is a result of collaborative effort between [APG](https://www.apg.nl/en) and 
 [Accenture NL](https://www.accenture.com/nl-en). 
 
 We had implemented these Helm charts for our project's needs, and as the results looks very promising, 
