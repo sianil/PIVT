@@ -269,7 +269,7 @@ manually back it up. In particular, Kafka Orderer with some state cannot handle 
 [Jira ticket](https://jira.hyperledger.org/browse/FAB-15541), hopefully Fabric guys will fix this soon.
 
 ### [Backup Restore Flow](#backup-restore-flow)
-![HL_backup_restore](https://s3-eu-west-1.amazonaws.com/raft-fabric-kube/images/HL_backup_restore.png)
+![HL_backup_restore](https://raft-fabric-kube.s3-eu-west-1.amazonaws.com/images/HL_backup_restore.png)
 
 First lets create a persistent network:
 ```
